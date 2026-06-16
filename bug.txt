@@ -1,0 +1,494 @@
+╭──────────────────────────────────────────────────────────────────────────────╮
+│   Agents: 0/12 | LLM: 1 | Tools: 0 | Tokens: 2.0k↑ 229↓ | Reports: 0/7 | ⏱   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\cli\main.py:1 │
+│ 305 in analyze                                                               │
+│                                                                              │
+│   1302 │   │   from tradingagents.graph.checkpointer import                  │
+│        clear_all_checkpoints                                                 │
+│   1303 │   │   n = clear_all_checkpoints(DEFAULT_CONFIG["data_cache_dir"])   │
+│   1304 │   │   console.print(f"[yellow]Cleared {n} checkpoint(s).[/yellow]") │
+│ ❱ 1305 │   run_analysis(checkpoint=checkpoint)                               │
+│   1306                                                                       │
+│   1307                                                                       │
+│   1308 if __name__ == "__main__":                                            │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\cli\main.py:1 │
+│ 135 in run_analysis                                                          │
+│                                                                              │
+│   1132 │   │                                                                 │
+│   1133 │   │   # Stream the analysis                                         │
+│   1134 │   │   trace = []                                                    │
+│ ❱ 1135 │   │   for chunk in graph.graph.stream(init_agent_state, **args):    │
+│   1136 │   │   │   # Process all messages in chunk, deduplicating by message │
+│        ID                                                                    │
+│   1137 │   │   │   for message in chunk.get("messages", []):                 │
+│   1138 │   │   │   │   msg_id = getattr(message, "id", None)                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\pre │
+│ gel\main.py:2982 in stream                                                   │
+│                                                                              │
+│   2979 │   │   │   │   while loop.tick():                                    │
+│   2980 │   │   │   │   │   for task in loop.match_cached_writes():           │
+│   2981 │   │   │   │   │   │   loop.output_writes(task.id, task.writes,      │
+│        cached=True)                                                          │
+│ ❱ 2982 │   │   │   │   │   for _ in runner.tick(                             │
+│   2983 │   │   │   │   │   │   [t for t in loop.tasks.values() if not        │
+│        t.writes],                                                            │
+│   2984 │   │   │   │   │   │   timeout=self.step_timeout,                    │
+│   2985 │   │   │   │   │   │   get_waiter=get_waiter,                        │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\pre │
+│ gel\_runner.py:207 in tick                                                   │
+│                                                                              │
+│   204 │   │   │   t = tasks[0]                                               │
+│   205 │   │   │   scheduled_error_handler = False                            │
+│   206 │   │   │   try:                                                       │
+│ ❱ 207 │   │   │   │   run_with_retry(                                        │
+│   208 │   │   │   │   │   t,                                                 │
+│   209 │   │   │   │   │   retry_policy,                                      │
+│   210 │   │   │   │   │   configurable={                                     │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\pre │
+│ gel\_retry.py:617 in run_with_retry                                          │
+│                                                                              │
+│   614 │   │   │   # clear any writes from previous attempts                  │
+│   615 │   │   │   task.writes.clear()                                        │
+│   616 │   │   │   # run the task                                             │
+│ ❱ 617 │   │   │   return task.proc.invoke(task.input, config)                │
+│   618 │   │   except ParentCommand as exc:                                   │
+│   619 │   │   │   ns: str = config[CONF][CONFIG_KEY_CHECKPOINT_NS]           │
+│   620 │   │   │   cmd = exc.args[0]                                          │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\_in │
+│ ternal\_runnable.py:684 in invoke                                            │
+│                                                                              │
+│   681 │   │   │   │   │   │   run = None                                     │
+│   682 │   │   │   │   │   # run in context                                   │
+│   683 │   │   │   │   │   with set_config_context(config, run) as context:   │
+│ ❱ 684 │   │   │   │   │   │   input = context.run(step.invoke, input,        │
+│       config, **kwargs)                                                      │
+│   685 │   │   │   │   else:                                                  │
+│   686 │   │   │   │   │   input = step.invoke(input, config)                 │
+│   687 │   │   # finish the root run                                          │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\_in │
+│ ternal\_runnable.py:426 in invoke                                            │
+│                                                                              │
+│   423 │   │   │   else:                                                      │
+│   424 │   │   │   │   run_manager.on_chain_end(ret)                          │
+│   425 │   │   else:                                                          │
+│ ❱ 426 │   │   │   ret = self.func(*args, **kwargs)                           │
+│   427 │   │   if self.recurse and isinstance(ret, Runnable):                 │
+│   428 │   │   │   return ret.invoke(input, config)                           │
+│   429 │   │   return ret                                                     │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\pre │
+│ built\tool_node.py:822 in _func                                              │
+│                                                                              │
+│    819 │   │   # Pass original tool calls without injection                  │
+│    820 │   │   input_types = [input_type] * len(tool_calls)                  │
+│    821 │   │   with get_executor_for_config(config) as executor:             │
+│ ❱  822 │   │   │   outputs = list(                                           │
+│    823 │   │   │   │   executor.map(self._run_one, tool_calls, input_types,  │
+│        tool_runtimes)                                                        │
+│    824 │   │   │   )                                                         │
+│    825                                                                       │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\concurrent\futures\_base.py │
+│ :619 in result_iterator                                                      │
+│                                                                              │
+│   616 │   │   │   │   while fs:                                              │
+│   617 │   │   │   │   │   # Careful not to keep a reference to the popped    │
+│       future                                                                 │
+│   618 │   │   │   │   │   if timeout is None:                                │
+│ ❱ 619 │   │   │   │   │   │   yield _result_or_cancel(fs.pop())              │
+│   620 │   │   │   │   │   else:                                              │
+│   621 │   │   │   │   │   │   yield _result_or_cancel(fs.pop(), end_time -   │
+│       time.monotonic())                                                      │
+│   622 │   │   │   finally:                                                   │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\concurrent\futures\_base.py │
+│ :317 in _result_or_cancel                                                    │
+│                                                                              │
+│   314 def _result_or_cancel(fut, timeout=None):                              │
+│   315 │   try:                                                               │
+│   316 │   │   try:                                                           │
+│ ❱ 317 │   │   │   return fut.result(timeout)                                 │
+│   318 │   │   finally:                                                       │
+│   319 │   │   │   fut.cancel()                                               │
+│   320 │   finally:                                                           │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\concurrent\futures\_base.py │
+│ :456 in result                                                               │
+│                                                                              │
+│   453 │   │   │   │   if self._state in [CANCELLED, CANCELLED_AND_NOTIFIED]: │
+│   454 │   │   │   │   │   raise CancelledError()                             │
+│   455 │   │   │   │   elif self._state == FINISHED:                          │
+│ ❱ 456 │   │   │   │   │   return self.__get_result()                         │
+│   457 │   │   │   │   else:                                                  │
+│   458 │   │   │   │   │   raise TimeoutError()                               │
+│   459 │   │   finally:                                                       │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\concurrent\futures\_base.py │
+│ :401 in __get_result                                                         │
+│                                                                              │
+│   398 │   def __get_result(self):                                            │
+│   399 │   │   if self._exception is not None:                                │
+│   400 │   │   │   try:                                                       │
+│ ❱ 401 │   │   │   │   raise self._exception                                  │
+│   402 │   │   │   finally:                                                   │
+│   403 │   │   │   │   # Break a reference cycle with the exception in        │
+│       self._exception                                                        │
+│   404 │   │   │   │   self = None                                            │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\concurrent\futures\thread.p │
+│ y:59 in run                                                                  │
+│                                                                              │
+│    56 │   │   │   return                                                     │
+│    57 │   │                                                                  │
+│    58 │   │   try:                                                           │
+│ ❱  59 │   │   │   result = self.fn(*self.args, **self.kwargs)                │
+│    60 │   │   except BaseException as exc:                                   │
+│    61 │   │   │   self.future.set_exception(exc)                             │
+│    62 │   │   │   # Break a reference cycle with the exception 'exc'         │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langchain_cor │
+│ e\runnables\config.py:650 in _wrapped_fn                                     │
+│                                                                              │
+│   647 │   │   contexts = [copy_context() for _ in range(len(iterables[0]))]  │
+│       # type: ignore[arg-type]                                               │
+│   648 │   │                                                                  │
+│   649 │   │   def _wrapped_fn(*args: Any) -> T:                              │
+│ ❱ 650 │   │   │   return contexts.pop().run(fn, *args)                       │
+│   651 │   │                                                                  │
+│   652 │   │   return super().map(                                            │
+│   653 │   │   │   _wrapped_fn,                                               │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\pre │
+│ built\tool_node.py:1046 in _run_one                                          │
+│                                                                              │
+│   1043 │   │                                                                 │
+│   1044 │   │   if self._wrap_tool_call is None:                              │
+│   1045 │   │   │   # No wrapper - execute directly                           │
+│ ❱ 1046 │   │   │   return self._execute_tool_sync(tool_request, input_type,  │
+│        config)                                                               │
+│   1047 │   │                                                                 │
+│   1048 │   │   # Define execute callable that can be called multiple times   │
+│   1049 │   │   def execute(req: ToolCallRequest) -> ToolMessage | Command:   │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\pre │
+│ built\tool_node.py:1006 in _execute_tool_sync                                │
+│                                                                              │
+│   1003 │   │   │   │   raise                                                 │
+│   1004 │   │   │                                                             │
+│   1005 │   │   │   # Error is handled - create error ToolMessage             │
+│ ❱ 1006 │   │   │   content = _handle_tool_error(e,                           │
+│        flag=self._handle_tool_errors)                                        │
+│   1007 │   │   │   return ToolMessage(                                       │
+│   1008 │   │   │   │   content=content,                                      │
+│   1009 │   │   │   │   name=call["name"],                                    │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\pre │
+│ built\tool_node.py:434 in _handle_tool_error                                 │
+│                                                                              │
+│    431 │   elif isinstance(flag, str):                                       │
+│    432 │   │   content = flag                                                │
+│    433 │   elif callable(flag):                                              │
+│ ❱  434 │   │   content = flag(e)  # type: ignore [assignment, call-arg]      │
+│    435 │   else:                                                             │
+│    436 │   │   msg = (                                                       │
+│    437 │   │   │   f"Got unexpected type of `handle_tool_error`. Expected    │
+│        bool, str "                                                           │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\pre │
+│ built\tool_node.py:391 in _default_handle_tool_errors                        │
+│                                                                              │
+│    388 │   """                                                               │
+│    389 │   if isinstance(e, ToolInvocationError):                            │
+│    390 │   │   return e.message                                              │
+│ ❱  391 │   raise e                                                           │
+│    392                                                                       │
+│    393                                                                       │
+│    394 def _handle_tool_error(                                               │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langgraph\pre │
+│ built\tool_node.py:958 in _execute_tool_sync                                 │
+│                                                                              │
+│    955 │   │                                                                 │
+│    956 │   │   try:                                                          │
+│    957 │   │   │   try:                                                      │
+│ ❱  958 │   │   │   │   response = tool.invoke(call_args, config)             │
+│    959 │   │   │   except ValidationError as exc:                            │
+│    960 │   │   │   │   # Filter out errors for injected arguments            │
+│    961 │   │   │   │   injected = self._injected_args.get(call["name"])      │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langchain_cor │
+│ e\tools\base.py:640 in invoke                                                │
+│                                                                              │
+│    637 │   │   **kwargs: Any,                                                │
+│    638 │   ) -> Any:                                                         │
+│    639 │   │   tool_input, kwargs = _prep_run_args(input, config, **kwargs)  │
+│ ❱  640 │   │   return self.run(tool_input, **kwargs)                         │
+│    641 │                                                                     │
+│    642 │   @override                                                         │
+│    643 │   async def ainvoke(                                                │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langchain_cor │
+│ e\tools\base.py:1002 in run                                                  │
+│                                                                              │
+│    999 │   │                                                                 │
+│   1000 │   │   if error_to_raise:                                            │
+│   1001 │   │   │   run_manager.on_tool_error(error_to_raise,                 │
+│        tool_call_id=tool_call_id)                                            │
+│ ❱ 1002 │   │   │   raise error_to_raise                                      │
+│   1003 │   │   output = _format_output(content, artifact, tool_call_id,      │
+│        self.name, status)                                                    │
+│   1004 │   │   run_manager.on_tool_end(output, color=color, name=self.name,  │
+│        **kwargs)                                                             │
+│   1005 │   │   return output                                                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langchain_cor │
+│ e\tools\base.py:968 in run                                                   │
+│                                                                              │
+│    965 │   │   │   │   │   tool_kwargs |= {"run_manager": run_manager}       │
+│    966 │   │   │   │   if config_param :=                                    │
+│        _get_runnable_config_param(self._run):                                │
+│    967 │   │   │   │   │   tool_kwargs |= {config_param: config}             │
+│ ❱  968 │   │   │   │   response = context.run(self._run, *tool_args,         │
+│        **tool_kwargs)                                                        │
+│    969 │   │   │   if self.response_format == "content_and_artifact":        │
+│    970 │   │   │   │   msg = (                                               │
+│    971 │   │   │   │   │   "Since response_format='content_and_artifact' "   │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\langchain_cor │
+│ e\tools\structured.py:97 in _run                                             │
+│                                                                              │
+│    94 │   │   │   │   kwargs["callbacks"] = run_manager.get_child()          │
+│    95 │   │   │   if config_param := _get_runnable_config_param(self.func):  │
+│    96 │   │   │   │   kwargs[config_param] = config                          │
+│ ❱  97 │   │   │   return self.func(*args, **kwargs)                          │
+│    98 │   │   msg = "StructuredTool does not support sync invocation."       │
+│    99 │   │   raise NotImplementedError(msg)                                 │
+│   100                                                                        │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\tradingagents │
+│ \agents\utils\core_stock_tools.py:22 in get_stock_data                       │
+│                                                                              │
+│   19 │   Returns:                                                            │
+│   20 │   │   str: A formatted dataframe containing the stock price data for  │
+│      the specified ticker symbol in the specified date range.                │
+│   21 │   """                                                                 │
+│ ❱ 22 │   return route_to_vendor("get_stock_data", symbol, start_date,        │
+│      end_date)                                                               │
+│   23                                                                         │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\tradingagents │
+│ \dataflows\interface.py:194 in route_to_vendor                               │
+│                                                                              │
+│   191 │   # No vendor returned data and none reported clean "no data" —      │
+│       surface the                                                            │
+│   192 │   # first real error (e.g. the primary vendor's network failure).    │
+│   193 │   if first_error is not None:                                        │
+│ ❱ 194 │   │   raise first_error                                              │
+│   195 │                                                                      │
+│   196 │   raise RuntimeError(f"No available vendor for '{method}'")          │
+│   197                                                                        │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\tradingagents │
+│ \dataflows\interface.py:161 in route_to_vendor                               │
+│                                                                              │
+│   158 │   │   impl_func = vendor_impl[0] if isinstance(vendor_impl, list)    │
+│       else vendor_impl                                                       │
+│   159 │   │                                                                  │
+│   160 │   │   try:                                                           │
+│ ❱ 161 │   │   │   return impl_func(*args, **kwargs)                          │
+│   162 │   │   except AlphaVantageRateLimitError:                             │
+│   163 │   │   │   continue  # Rate limits: try the next vendor               │
+│   164 │   │   except NoMarketDataError as e:                                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\tradingagents │
+│ \dataflows\y_finance.py:24 in get_YFin_data_online                           │
+│                                                                              │
+│    21 │   ticker = yf.Ticker(canonical)                                      │
+│    22 │                                                                      │
+│    23 │   # Fetch historical data for the specified date range               │
+│ ❱  24 │   data = yf_retry(lambda: ticker.history(start=start_date,           │
+│       end=end_date))                                                         │
+│    25 │                                                                      │
+│    26 │   # Empty result means the symbol is unknown/delisted. Raise a typed │
+│       error                                                                  │
+│    27 │   # instead of returning prose: the routing layer turns it into a    │
+│       single                                                                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\tradingagents │
+│ \dataflows\stockstats_utils.py:26 in yf_retry                                │
+│                                                                              │
+│    23 │   """                                                                │
+│    24 │   for attempt in range(max_retries + 1):                             │
+│    25 │   │   try:                                                           │
+│ ❱  26 │   │   │   return func()                                              │
+│    27 │   │   except YFRateLimitError:                                       │
+│    28 │   │   │   if attempt < max_retries:                                  │
+│    29 │   │   │   │   delay = base_delay * (2 ** attempt)                    │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\tradingagents │
+│ \dataflows\y_finance.py:24 in <lambda>                                       │
+│                                                                              │
+│    21 │   ticker = yf.Ticker(canonical)                                      │
+│    22 │                                                                      │
+│    23 │   # Fetch historical data for the specified date range               │
+│ ❱  24 │   data = yf_retry(lambda: ticker.history(start=start_date,           │
+│       end=end_date))                                                         │
+│    25 │                                                                      │
+│    26 │   # Empty result means the symbol is unknown/delisted. Raise a typed │
+│       error                                                                  │
+│    27 │   # instead of returning prose: the routing layer turns it into a    │
+│       single                                                                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\util │
+│ s.py:123 in wrapper                                                          │
+│                                                                              │
+│    120 │   │   logger.debug(f'Entering {func.__name__}()')                   │
+│    121 │   │                                                                 │
+│    122 │   │   with IndentationContext():                                    │
+│ ❱  123 │   │   │   result = func(*args, **kwargs)                            │
+│    124 │   │                                                                 │
+│    125 │   │   logger.debug(f'Exiting {func.__name__}()')                    │
+│    126 │   │   return result                                                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\base │
+│ .py:129 in history                                                           │
+│                                                                              │
+│   126 │                                                                      │
+│   127 │   @utils.log_indent_decorator                                        │
+│   128 │   def history(self, *args, **kwargs) -> pd.DataFrame:                │
+│ ❱ 129 │   │   return self._lazy_load_price_history().history(*args,          │
+│       **kwargs)                                                              │
+│   130 │                                                                      │
+│   131 │   # ------------------------                                         │
+│   132                                                                        │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\base │
+│ .py:135 in _lazy_load_price_history                                          │
+│                                                                              │
+│   132 │                                                                      │
+│   133 │   def _lazy_load_price_history(self):                                │
+│   134 │   │   if self._price_history is None:                                │
+│ ❱ 135 │   │   │   self._price_history = PriceHistory(self._data,             │
+│       self.ticker, self._get_ticker_tz(timeout=10))                          │
+│   136 │   │   return self._price_history                                     │
+│   137 │                                                                      │
+│   138 │   def _get_ticker_tz(self, timeout):                                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\base │
+│ .py:150 in _get_ticker_tz                                                    │
+│                                                                              │
+│   147 │   │   │   tz = None                                                  │
+│   148 │   │                                                                  │
+│   149 │   │   if tz is None:                                                 │
+│ ❱ 150 │   │   │   tz = self._fetch_ticker_tz(timeout)                        │
+│   151 │   │   │   if tz is None:                                             │
+│   152 │   │   │   │   # _fetch_ticker_tz works in 99.999% of cases.          │
+│   153 │   │   │   │   # For rare fail get from info.                         │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\util │
+│ s.py:123 in wrapper                                                          │
+│                                                                              │
+│    120 │   │   logger.debug(f'Entering {func.__name__}()')                   │
+│    121 │   │                                                                 │
+│    122 │   │   with IndentationContext():                                    │
+│ ❱  123 │   │   │   result = func(*args, **kwargs)                            │
+│    124 │   │                                                                 │
+│    125 │   │   logger.debug(f'Exiting {func.__name__}()')                    │
+│    126 │   │   return result                                                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\base │
+│ .py:182 in _fetch_ticker_tz                                                  │
+│                                                                              │
+│   179 │   │   url = f"{_BASE_URL_}/v8/finance/chart/{self.ticker}"           │
+│   180 │   │                                                                  │
+│   181 │   │   try:                                                           │
+│ ❱ 182 │   │   │   data = self._data.cache_get(url=url, params=params,        │
+│       timeout=timeout)                                                       │
+│   183 │   │   │   data = data.json()                                         │
+│   184 │   │   except YFRateLimitError:                                       │
+│   185 │   │   │   # Must propagate this                                      │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\data │
+│ .py:46 in wrapped                                                            │
+│                                                                              │
+│    43 │   │   kwargs = {k: frozendict(v) if isinstance(v, dict) else v for   │
+│       k, v in kwargs.items()}                                                │
+│    44 │   │   args = tuple([tuple(arg) if isinstance(arg, list) else arg for │
+│       arg in args])                                                          │
+│    45 │   │   kwargs = {k: tuple(v) if isinstance(v, list) else v for k, v   │
+│       in kwargs.items()}                                                     │
+│ ❱  46 │   │   return func(*args, **kwargs)                                   │
+│    47 │                                                                      │
+│    48 │   # copy over the lru_cache extra methods to this wrapper to be able │
+│       to access them                                                         │
+│    49 │   # after this decorator has been applied                            │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\data │
+│ .py:467 in cache_get                                                         │
+│                                                                              │
+│   464 │   @lru_cache_freezeargs                                              │
+│   465 │   @lru_cache(maxsize=cache_maxsize)                                  │
+│   466 │   def cache_get(self, url, params=None, timeout=30):                 │
+│ ❱ 467 │   │   return self.get(url, params, timeout)                          │
+│   468 │                                                                      │
+│   469 │   def get_raw_json(self, url, params=None, timeout=30):              │
+│   470 │   │   utils.get_yf_logger().debug(f'get_raw_json(): {url}')          │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\util │
+│ s.py:123 in wrapper                                                          │
+│                                                                              │
+│    120 │   │   logger.debug(f'Entering {func.__name__}()')                   │
+│    121 │   │                                                                 │
+│    122 │   │   with IndentationContext():                                    │
+│ ❱  123 │   │   │   result = func(*args, **kwargs)                            │
+│    124 │   │                                                                 │
+│    125 │   │   logger.debug(f'Exiting {func.__name__}()')                    │
+│    126 │   │   return result                                                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\data │
+│ .py:384 in get                                                               │
+│                                                                              │
+│   381 │                                                                      │
+│   382 │   @utils.log_indent_decorator                                        │
+│   383 │   def get(self, url, params=None, timeout=30):                       │
+│ ❱ 384 │   │   response = self._make_request(url, request_method =            │
+│       self._session.get, params=params, timeout=timeout)                     │
+│   385 │   │                                                                  │
+│   386 │   │   # Accept cookie-consent if redirected to consent page          │
+│   387 │   │   if not self._is_this_consent_url(response.url):                │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\util │
+│ s.py:123 in wrapper                                                          │
+│                                                                              │
+│    120 │   │   logger.debug(f'Entering {func.__name__}()')                   │
+│    121 │   │                                                                 │
+│    122 │   │   with IndentationContext():                                    │
+│ ❱  123 │   │   │   result = func(*args, **kwargs)                            │
+│    124 │   │                                                                 │
+│    125 │   │   logger.debug(f'Exiting {func.__name__}()')                    │
+│    126 │   │   return result                                                 │
+│                                                                              │
+│ C:\ProgramData\miniconda3\envs\tradingagents\Lib\site-packages\yfinance\data │
+│ .py:460 in _make_request                                                     │
+│                                                                              │
+│   457 │   │   │                                                              │
+│   458 │   │   │   # Raise exception if rate limited                          │
+│   459 │   │   │   if response.status_code == 429:                            │
+│ ❱ 460 │   │   │   │   raise YFRateLimitError()                               │
+│   461 │   │                                                                  │
+│   462 │   │   return response                                                │
+│   463                                                                        │
+╰──────────────────────────────────────────────────────────────────────────────╯
+YFRateLimitError: Too Many Requests. Rate limited. Try after a while.
+[NOTE] During task with name 'tools_market' and id
+'979976ff-f019-c378-fe90-e496e4d86f0c'
+(tradingagents)
+Faye@DESKTOP-16JP953 MINGW64 ~/Desktop/Workspace/TradingAgents (main)

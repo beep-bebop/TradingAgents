@@ -87,7 +87,15 @@ def _make_api_request(function_name: str, params: dict) -> dict | str:
         # Check for rate limit error
         if "Information" in response_json:
             info_message = response_json["Information"]
-            if "rate limit" in info_message.lower() or "api key" in info_message.lower():
+            unavailable_markers = (
+                "rate limit",
+                "api key",
+                "premium endpoint",
+                "premium plan",
+                "subscribe",
+                "entitlement",
+            )
+            if any(marker in info_message.lower() for marker in unavailable_markers):
                 raise AlphaVantageRateLimitError(f"Alpha Vantage rate limit exceeded: {info_message}")
     except json.JSONDecodeError:
         # Response is not JSON (likely CSV data), which is normal
