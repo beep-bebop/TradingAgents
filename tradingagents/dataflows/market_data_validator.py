@@ -11,11 +11,12 @@ claim. Deterministic, no LLM involved.
 from __future__ import annotations
 
 from collections.abc import Iterable
+from io import StringIO
 
 import pandas as pd
 from stockstats import wrap
 
-from tradingagents.dataflows.stockstats_utils import load_ohlcv
+from tradingagents.dataflows.interface import route_to_vendor
 
 # A fixed, common indicator set so the snapshot is the same shape every run.
 DEFAULT_SNAPSHOT_INDICATORS: tuple[str, ...] = (
@@ -25,14 +26,58 @@ DEFAULT_SNAPSHOT_INDICATORS: tuple[str, ...] = (
 )
 
 
+def _parse_routed_ohlcv_csv(raw: str) -> pd.DataFrame:
+    """Convert routed stock-data CSV output into stockstats-compatible OHLCV."""
+    text = (raw or "").strip()
+    if not text or text.startswith(("NO_DATA_AVAILABLE:", "DATA_UNAVAILABLE:")):
+        raise ValueError(text or "No OHLCV data returned by vendor router.")
+
+    data = pd.read_csv(StringIO(text), comment="#")
+    if data.empty:
+        raise ValueError("No OHLCV rows returned by vendor router.")
+
+    column_map = {}
+    for column in data.columns:
+        key = str(column).strip().lower().replace(" ", "_")
+        if key in {"date", "datetime", "timestamp"}:
+            column_map[column] = "Date"
+        elif key == "open":
+            column_map[column] = "Open"
+        elif key == "high":
+            column_map[column] = "High"
+        elif key == "low":
+            column_map[column] = "Low"
+        elif key in {"close", "adjusted_close"}:
+            column_map[column] = "Close"
+        elif key == "volume":
+            column_map[column] = "Volume"
+
+    data = data.rename(columns=column_map)
+    missing = {"Date", "Close"} - set(data.columns)
+    if missing:
+        raise ValueError(
+            "Routed stock data missing required OHLCV column(s): "
+            + ", ".join(sorted(missing))
+        )
+    return data
+
+
+def load_verified_ohlcv(symbol: str, curr_date: str) -> pd.DataFrame:
+    """Load OHLCV through the configured vendor chain for verification snapshots."""
+    end = pd.to_datetime(curr_date).strftime("%Y-%m-%d")
+    start = (pd.to_datetime(curr_date) - pd.DateOffset(years=5)).strftime("%Y-%m-%d")
+    routed = route_to_vendor("get_stock_data", symbol, start, end)
+    return _parse_routed_ohlcv_csv(routed)
+
+
 def _verified_rows(symbol: str, curr_date: str) -> pd.DataFrame:
     """OHLCV on or before curr_date, date-sorted. Raises if nothing usable.
 
-    ``load_ohlcv`` already normalizes the Date column and filters out
-    look-ahead rows, but we re-apply the cutoff defensively — this is a
-    verification path, so it must not trust its input to be pre-filtered.
+    ``load_verified_ohlcv`` already normalizes routed vendor output, but we
+    re-apply the cutoff defensively because this verification path must not
+    trust its input to be pre-filtered.
     """
-    data = load_ohlcv(symbol, curr_date)
+    data = load_verified_ohlcv(symbol, curr_date)
     if data is None or data.empty:
         raise ValueError(f"No OHLCV data available for {symbol}.")
 

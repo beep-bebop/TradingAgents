@@ -29,7 +29,7 @@ class TestVerifiedSnapshot:
             pd.DataFrame({"Date": [pd.Timestamp("2026-06-01")], "Open": [999.0],
                           "High": [999.0], "Low": [999.0], "Close": [999.0], "Volume": [999]}),
         ], ignore_index=True)
-        monkeypatch.setattr(validator, "load_ohlcv", lambda s, d: data)
+        monkeypatch.setattr(validator, "load_verified_ohlcv", lambda s, d: data)
 
         snap = validator.build_verified_market_snapshot("COF", "2026-05-13")
         assert "Verified market data snapshot for COF" in snap
@@ -39,28 +39,51 @@ class TestVerifiedSnapshot:
         assert "boll_lb" in snap             # indicators present
 
     def test_uses_previous_trading_day_when_date_is_weekend(self, monkeypatch):
-        monkeypatch.setattr(validator, "load_ohlcv", lambda s, d: _sample_ohlcv())
+        monkeypatch.setattr(validator, "load_verified_ohlcv", lambda s, d: _sample_ohlcv())
         # 2026-05-16 is a Saturday; latest row should be Fri 2026-05-15
         snap = validator.build_verified_market_snapshot("COF", "2026-05-16")
         assert "Latest trading row used: 2026-05-15" in snap
         assert "Recent verified closes" in snap
 
     def test_raises_when_no_rows_on_or_before_date(self, monkeypatch):
-        monkeypatch.setattr(validator, "load_ohlcv", lambda s, d: _sample_ohlcv())
+        monkeypatch.setattr(validator, "load_verified_ohlcv", lambda s, d: _sample_ohlcv())
         with pytest.raises(ValueError):
             validator.build_verified_market_snapshot("COF", "2020-01-01")
 
     def test_raises_on_empty_data(self, monkeypatch):
-        monkeypatch.setattr(validator, "load_ohlcv", lambda s, d: pd.DataFrame())
+        monkeypatch.setattr(validator, "load_verified_ohlcv", lambda s, d: pd.DataFrame())
         with pytest.raises(ValueError):
             validator.build_verified_market_snapshot("COF", "2026-05-13")
 
     def test_look_back_window_capped_at_30(self, monkeypatch):
-        monkeypatch.setattr(validator, "load_ohlcv", lambda s, d: _sample_ohlcv())
+        monkeypatch.setattr(validator, "load_verified_ohlcv", lambda s, d: _sample_ohlcv())
         snap = validator.build_verified_market_snapshot("COF", "2026-05-20", look_back_days=999)
         # last-N closes table has at most 30 data rows
         close_rows = [ln for ln in snap.splitlines() if ln.startswith("| 2026-")]
         assert 0 < len(close_rows) <= 30
+
+    def test_loader_uses_vendor_router_for_snapshot_ohlcv(self, monkeypatch):
+        csv = "\n".join([
+            "date,open,high,low,close,volume",
+            "2026-05-18,10,11,9,10.5,1000",
+            "2026-05-19,11,12,10,11.5,1100",
+            "2026-05-20,12,13,11,12.5,1200",
+        ])
+
+        calls = []
+
+        def routed_loader(method, symbol, start_date, end_date):
+            calls.append((method, symbol, start_date, end_date))
+            return csv
+
+        monkeypatch.setattr(validator, "route_to_vendor", routed_loader)
+
+        snap = validator.build_verified_market_snapshot("RKLB", "2026-05-20")
+
+        assert calls == [("get_stock_data", "RKLB", "2021-05-20", "2026-05-20")]
+        assert "Verified market data snapshot for RKLB" in snap
+        assert "Latest trading row used: 2026-05-20" in snap
+        assert "| Close | 12.50 |" in snap
 
 
 @pytest.mark.unit
@@ -69,7 +92,7 @@ class TestTool:
         from tradingagents.agents.utils.market_data_validation_tools import (
             get_verified_market_snapshot,
         )
-        monkeypatch.setattr(validator, "load_ohlcv", lambda s, d: _sample_ohlcv())
+        monkeypatch.setattr(validator, "load_verified_ohlcv", lambda s, d: _sample_ohlcv())
         out = get_verified_market_snapshot.invoke(
             {"symbol": "COF", "curr_date": "2026-05-20"}
         )
