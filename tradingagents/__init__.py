@@ -1,5 +1,29 @@
 import contextlib
+import os
 import warnings
+
+
+def _normalize_ssl_cert_file() -> None:
+    """Repair a broken ``SSL_CERT_FILE`` before any HTTP client is created.
+
+    Conda's ``openssl_activate.sh`` (Git Bash on Windows) sets
+    ``${CONDA_PREFIX}/ssl/cacert.pem``, but the bundle is at
+    ``${CONDA_PREFIX}/Library/ssl/cacert.pem``. When the path is missing,
+    try the Library location; otherwise unset so httpx falls back to certifi.
+    """
+    cert = os.environ.get("SSL_CERT_FILE")
+    if not cert or os.path.isfile(cert):
+        return
+    prefix = os.environ.get("CONDA_PREFIX")
+    if prefix:
+        candidate = os.path.join(prefix, "Library", "ssl", "cacert.pem")
+        if os.path.isfile(candidate):
+            os.environ["SSL_CERT_FILE"] = candidate
+            return
+    os.environ.pop("SSL_CERT_FILE", None)
+
+
+_normalize_ssl_cert_file()
 
 # Load .env files at package import so DEFAULT_CONFIG's env-var overlay
 # (and every llm_clients consumer) sees the user's keys regardless of
